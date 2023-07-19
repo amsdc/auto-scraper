@@ -4,7 +4,7 @@ import minify_html
 # list of tags to filter
 FILTER_TAGS = ["script", "style", "header", "footer", "img", "nav", "aside",
 "iframe", "audio", "video", "form", "svg", "canvas",
-"blockquote", "figure", "time", "progress","wow-image","option"]
+"blockquote", "figure", "time", "progress","wow-image","option", "script"]
 FILTER_ATTRS = ["id", "name", "class", "style"]
 
 def preprocess_html(html: str) -> str:
@@ -35,4 +35,5 @@ def preprocess_html(html: str) -> str:
             tag.extract()
 
     cleaned_html = str(main_content)
-    return minify_html.minify(cleaned_html, remove_empty_space=True)
+    print(".", cleaned_html)
+    return minify_html.minify(cleaned_html, minify_js=True)
