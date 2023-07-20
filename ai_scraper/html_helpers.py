@@ -1,11 +1,18 @@
+import logging
+
 from bs4 import BeautifulSoup
-import minify_html
+import htmlmin
+
+
+logger = logging.getLogger(__name__)
+
 
 # list of tags to filter
 FILTER_TAGS = ["script", "style", "header", "footer", "img", "nav", "aside",
 "iframe", "audio", "video", "form", "svg", "canvas",
 "blockquote", "figure", "time", "progress","wow-image","option", "script"]
-FILTER_ATTRS = ["id", "name", "class", "style"]
+FILTER_ATTRS = ["id", "name", "class", "style", "href", "src"]
+
 
 def preprocess_html(html: str) -> str:
     """preprocess_html 
@@ -35,5 +42,5 @@ def preprocess_html(html: str) -> str:
             tag.extract()
 
     cleaned_html = str(main_content)
-    print(".", cleaned_html)
-    return minify_html.minify(cleaned_html, minify_js=True)
+    logger.debug(cleaned_html)
+    return htmlmin.minify(cleaned_html, True, True)
