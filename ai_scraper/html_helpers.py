@@ -9,10 +9,9 @@ logger = logging.getLogger(__name__)
 
 # list of tags to filter
 FILTER_TAGS = ["script", "style", "header", "footer", "img", "nav", "aside",
-"iframe", "audio", "video", "form", "svg", "canvas",
+"iframe", "audio", "video",, "svg", "canvas",
 "blockquote", "figure", "time", "progress","wow-image","option", "script"]
-FILTER_ATTRS = ["id", "name", "class", "style", "href", "src"]
-
+FILTER_ATTRS = ["style", "href", "src"]
 
 def preprocess_html(html: str) -> str:
     """preprocess_html 
