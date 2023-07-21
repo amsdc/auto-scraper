@@ -39,7 +39,7 @@ class OpenAIScraper(ScraperGeneratorBase):
             completion = openai.ChatCompletion.create(
                 model = "gpt-3.5-turbo-16k",
                 temperature = 0.0,
-                messages =  [{"role": "system", "content": prompt_template}, {"role": "user", "content": str(input_template)}]
+                messages =  [{"role": "system", "content": data_prompt}, {"role": "user", "content": str(input_template)}]
             )
             
             text = completion['choices'][0]['message']['content']
@@ -59,7 +59,28 @@ class OpenAIScraper(ScraperGeneratorBase):
         completion = openai.ChatCompletion.create(
             model = "gpt-3.5-turbo-16k",
             temperature = 0.0,
-            messages =  [{"role": "system", "content": prompt_string}, {"role": "user", "content": str(input_template)}]
+            messages =  [{"role": "system", "content": field_prompt}, {"role": "user", "content": str(input_template)}]
+        )
+            
+        print(completion)
+        text = completion['choices'][0]['message']['content']
+        self.fields = text
+        print(text)
+        return(text)
+    
+    def auto_filter(self,table_title,query,json_array,):
+
+        input_template = {
+            "Title":table_title,
+            "Columns and Types":self.fields,
+            "Sample Data": json_array[:3],
+            "Query": query
+        }
+
+        completion = openai.ChatCompletion.create(
+            model = "gpt-3.5-turbo",
+            temperature = 0.0,
+            messages =  [{"role": "system", "content": sqlite_prompt}, {"role": "user", "content": str(input_template)}]
         )
             
         print(completion)
