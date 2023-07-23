@@ -9,7 +9,7 @@ from typing import Optional
 import openai
 from prompts import sys_prompt_scrapper,sys_prompt_sqlite,field_prompt
 import json
-openai.api_key = "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"
+
 
 logger = logging.getLogger(__name__)
 class ScraperGeneratorBase(ABC):
