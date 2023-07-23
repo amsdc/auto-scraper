@@ -4,11 +4,12 @@ import logging
 from abc import ABC, abstractmethod
 import requests
 import html_helpers
-
+import time
 from typing import Optional
 import openai
 from prompts import sys_prompt_scrapper,sys_prompt_sqlite,field_prompt
 import json
+openai.api_key = "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"
 
 logger = logging.getLogger(__name__)
 class ScraperGeneratorBase(ABC):
@@ -47,15 +48,16 @@ class OpenAIScraper(ScraperGeneratorBase):
     def get_html(self):
         html_string = html_helpers.preprocess_html(self.url)
         self.html_string = html_string
+        return html_string
 
-    def extract_data(self,k:Optional[int] = 30000,):
+    def extract_data(self,html_string,k:Optional[int] = 30000):
         total_data = []
-        for i in range(0,len(self.html_string),k):
+        for i in range(0,len(html_string),k):
             #ADD TOO LONG INPUT THING
             input_template = {
                 "spec_version": "1.0",
                 "page_url": self.url,
-                "page_html": str(self.html_string)[i:i+k],
+                "page_html": str(html_string)[i:i+k],
                 "metadata": {
                     "type": "tabular",
                     "attributes": self.fields
@@ -69,7 +71,9 @@ class OpenAIScraper(ScraperGeneratorBase):
             )
             
             text = completion['choices'][0]['message']['content']
+            print(text)
             text = """{}""".format(text).replace("\\"," ").rstrip("`")
+            print(text)
             text = json.loads(text)
             data = text["content"]
             total_data.extend(data)
@@ -112,12 +116,11 @@ class OpenAIScraper(ScraperGeneratorBase):
         print(completion)
         text = completion['choices'][0]['message']['content']
         print(text)
-        return(text)
+        return text
 
-
-
-scraper = OpenAIScraper("https://www.accuweather.com/en/in/chennai/206671/hourly-weather-forecast/206671")
+scraper = OpenAIScraper("https://devpost.com/hackathons")
 html = scraper.get_html()
-fields = scraper.suggest_fields()
 print(html)
-print(fields)
+fields = scraper.suggest_fields()
+time.sleep(5)
+json_data = scraper.extract_data(html)
