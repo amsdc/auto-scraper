@@ -71,9 +71,7 @@ class OpenAIScraper(ScraperGeneratorBase):
             )
             
             text = completion['choices'][0]['message']['content']
-            print(text)
             text = """{}""".format(text).replace("\\"," ").rstrip("`")
-            print(text)
             text = json.loads(text)
             data = text["content"]
             total_data.extend(data)
@@ -124,3 +122,4 @@ print(html)
 fields = scraper.suggest_fields()
 time.sleep(5)
 json_data = scraper.extract_data(html)
+print(json_data)
