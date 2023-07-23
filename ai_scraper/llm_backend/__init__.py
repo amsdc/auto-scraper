@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import requests
 
-from ai_scraper import html_helpers
+from ai_scraper.llm_backend import html_helpers
 
 
 logger = logging.getLogger(__name__)

@@ -1,11 +1,37 @@
 import logging
 import requests
-from ai_scraper.llm_backend import ScraperGeneratorBase
+import logging
+from abc import ABC, abstractmethod
+import requests
+import html_helpers
+
 from typing import Optional
-from ai_scraper import html_helpers
+import openai
+from prompts import sys_prompt_scrapper,sys_prompt_sqlite,field_prompt
+import json
 
 logger = logging.getLogger(__name__)
-
+class ScraperGeneratorBase(ABC):
+    @abstractmethod
+    def __init__(self):
+        """__init__ 
+        
+        Initialise a scraper. Use an API key as args.
+        """
+        pass
+    
+    def set_page(self, page):
+        self.url = page
+    
+    def fetch_clean_html(self, user_agent="Atlanta/1.0"):
+        data = requests.get(self.url, headers={"User-Agent": user_agent}).text
+        logger.debug(data)
+        return html_helpers.preprocess_html(data)
+    
+'''    @abstractmethod
+    def generate_scraper(self):
+        pass
+'''
 
 class OpenAIScraper(ScraperGeneratorBase):
     """OpenAILLM 
@@ -22,14 +48,14 @@ class OpenAIScraper(ScraperGeneratorBase):
         html_string = html_helpers.preprocess_html(self.url)
         self.html_string = html_string
 
-    def extract_data(self,k:Optional[int] = 30000):
+    def extract_data(self,k:Optional[int] = 30000,):
         total_data = []
         for i in range(0,len(self.html_string),k):
             #ADD TOO LONG INPUT THING
             input_template = {
                 "spec_version": "1.0",
                 "page_url": self.url,
-                "page_html": str(html_string)[i:i+k],
+                "page_html": str(self.html_string)[i:i+k],
                 "metadata": {
                     "type": "tabular",
                     "attributes": self.fields
@@ -39,7 +65,7 @@ class OpenAIScraper(ScraperGeneratorBase):
             completion = openai.ChatCompletion.create(
                 model = "gpt-3.5-turbo-16k",
                 temperature = 0.0,
-                messages =  [{"role": "system", "content": data_prompt}, {"role": "user", "content": str(input_template)}]
+                messages =  [{"role": "system", "content": sys_prompt_scrapper}, {"role": "user", "content": str(input_template)}]
             )
             
             text = completion['choices'][0]['message']['content']
@@ -80,7 +106,7 @@ class OpenAIScraper(ScraperGeneratorBase):
         completion = openai.ChatCompletion.create(
             model = "gpt-3.5-turbo",
             temperature = 0.0,
-            messages =  [{"role": "system", "content": sqlite_prompt}, {"role": "user", "content": str(input_template)}]
+            messages =  [{"role": "system", "content": sys_prompt_sqlite}, {"role": "user", "content": str(input_template)}]
         )
             
         print(completion)
@@ -88,3 +114,10 @@ class OpenAIScraper(ScraperGeneratorBase):
         print(text)
         return(text)
 
+
+
+scraper = OpenAIScraper("https://www.accuweather.com/en/in/chennai/206671/hourly-weather-forecast/206671")
+html = scraper.get_html()
+fields = scraper.suggest_fields()
+print(html)
+print(fields)
